@@ -3,7 +3,7 @@ package com.sudo_pacman.cashapp.di
 import com.sudo_pacman.cashapp.data.remote.ApiService
 import com.sudo_pacman.cashapp.data.repository.AppRepositoryImpl
 import com.sudo_pacman.cashapp.domain.repository.AppRepository
-import com.sudo_pacman.cashapp.ui.viewmodel.WalletViewModel
+import com.sudo_pacman.cashapp.ui.viewmodel.wallat_view_model.WalletViewModel
 import io.ktor.client.*
 import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.contentnegotiation.*

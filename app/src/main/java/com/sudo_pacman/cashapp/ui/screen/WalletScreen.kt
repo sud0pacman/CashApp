@@ -9,9 +9,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sudo_pacman.cashapp.ui.viewmodel.WalletEvent
-import com.sudo_pacman.cashapp.ui.viewmodel.WalletState
-import com.sudo_pacman.cashapp.ui.viewmodel.WalletViewModel
+import com.sudo_pacman.cashapp.ui.viewmodel.wallat_view_model.WalletEvent
+import com.sudo_pacman.cashapp.ui.viewmodel.wallat_view_model.WalletState
+import com.sudo_pacman.cashapp.ui.viewmodel.wallat_view_model.WalletViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
