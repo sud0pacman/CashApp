@@ -16,8 +16,8 @@ class WalletViewModel(private val repository: AppRepository) : ViewModel() {
     val state: StateFlow<WalletState> = _state.asStateFlow()
 
     init {
-        createUser()
-        onEvent(WalletEvent.LoadData)
+//        createUser()
+//        onEvent(WalletEvent.LoadData)
     }
 
     private fun createUser() {
