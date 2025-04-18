@@ -15,8 +15,8 @@ data class WalletState(
 
 sealed class WalletEvent {
     object LoadData : WalletEvent()
+    object ClickAddNewCard : WalletEvent()
     data class UpdatePaymentMethod(val method: String, val cardId: Int? = null) : WalletEvent()
     data class ActivatePromocode(val code: String) : WalletEvent()
-    data class AddCard(val number: String, val expireDate: String) : WalletEvent()
 }
 

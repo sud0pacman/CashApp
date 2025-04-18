@@ -33,7 +33,8 @@ import com.sudo_pacman.cashapp.ui.theme.medium18
 fun PromoCodeBottomSheetContent(
     modifier: Modifier = Modifier,
     onClickBack: () -> Unit,
-    onValueChange: (String) -> Unit
+    onValueChange: ((String) -> Unit)? = null,
+    onClickSave: (String) -> Unit
 ) {
     var text by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
@@ -73,7 +74,7 @@ fun PromoCodeBottomSheetContent(
             value = text,
             onValueChange = {
                 text = it
-                onValueChange(it)
+                onValueChange?.invoke(it)
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -92,7 +93,9 @@ fun PromoCodeBottomSheetContent(
         16.VerticalSpace()
 
         PrimaryButton(
-            onClick = {},
+            onClick = {
+                onClickSave(text)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),

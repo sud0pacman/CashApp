@@ -11,3 +11,7 @@ fun Double.formatWithCommasAndDecimals(): String {
     }
     return formatter.format(this)
 }
+
+fun clearCardNumber(cardNumber: String): String {
+    return cardNumber.filter { it.isDigit() };
+}

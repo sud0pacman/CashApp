@@ -1,13 +1,15 @@
 package com.sudo_pacman.cashapp.ui.viewmodel.wallat_view_model
 
 import androidx.lifecycle.ViewModel
-import com.sudo_pacman.cashapp.domain.repository.AppRepository
 import androidx.lifecycle.viewModelScope
 import com.sudo_pacman.cashapp.data.model.AddCardRequest
 import com.sudo_pacman.cashapp.data.model.UpdateMethodRequest
+import com.sudo_pacman.cashapp.domain.repository.AppRepository
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -15,9 +17,13 @@ class WalletViewModel(private val repository: AppRepository) : ViewModel() {
     private val _state = MutableStateFlow(WalletState())
     val state: StateFlow<WalletState> = _state.asStateFlow()
 
+    private val _navigationEvents = Channel<NavigationEvent>()
+    val navigationEvents = _navigationEvents.receiveAsFlow()
+
     init {
-//        createUser()
-//        onEvent(WalletEvent.LoadData)
+        createUser()
+        onEvent(WalletEvent.LoadData)
+        onEvent(WalletEvent.UpdatePaymentMethod("cash"))
     }
 
     private fun createUser() {
@@ -97,21 +103,16 @@ class WalletViewModel(private val repository: AppRepository) : ViewModel() {
                     )
                 }
             }
-            is WalletEvent.AddCard -> {
+            is WalletEvent.ClickAddNewCard -> {
                 viewModelScope.launch {
-                    _state.update { it.copy(isLoading = true, error = null) }
-                    val request = AddCardRequest(event.number, event.expireDate)
-                    repository.addCard(_state.value.phone, request).fold(
-                        onSuccess = {
-                            _state.update { it.copy(isLoading = false) }
-                            onEvent(WalletEvent.LoadData) // Kartalar ro'yxatini yangilash
-                        },
-                        onFailure = { e ->
-                            _state.update { it.copy(error = e.message, isLoading = false) }
-                        }
-                    )
+                    _navigationEvents.send(NavigationEvent.NavigateToAddCard)
                 }
             }
         }
+    }
+
+
+    sealed class NavigationEvent {
+        object NavigateToAddCard : NavigationEvent()
     }
 }
