@@ -9,13 +9,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.input.TextObfuscationMode.Companion.Hidden
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.sudo_pacman.cashapp.core.utils.VerticalSpace
@@ -75,18 +79,21 @@ fun WalletScreenContent(
     onEvent: (WalletEvent) -> Unit
 ) {
     var cashIsChecked by remember { mutableStateOf(state.activeMethod == "cash") }
-    var cardIsChecked by remember { mutableStateOf(state.activeCardId != null) }
+    var cardIsChecked by remember { mutableStateOf(state.activeMethod != "cash") }
 
     var showBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     if (showBottomSheet) {
         ModalBottomSheet(
+            sheetState = sheetState,
             containerColor = Color(0xffF4F4F4),
             dragHandle = {},
             onDismissRequest = { showBottomSheet = false }
         ) {
             PromoCodeBottomSheetContent(
                 onClickSave = {
+                    showBottomSheet = false
                     onEvent(WalletEvent.ActivatePromocode(it))
                 },
                 onClickBack = { showBottomSheet = false },
@@ -158,7 +165,7 @@ fun WalletScreenContent(
                                     onCheckedChange = {
                                         cashIsChecked = !cashIsChecked
                                         if (cashIsChecked) onEvent(WalletEvent.UpdatePaymentMethod(method = "cash"))
-                                        else onEvent(WalletEvent.UpdatePaymentMethod(method = "card"))
+                                        else onEvent(WalletEvent.UpdatePaymentMethod(method = "card", cardId = state.cards.first().id))
                                     },
                                     isChecked = cashIsChecked
                                 )

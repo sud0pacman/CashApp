@@ -235,9 +235,6 @@ fun AddCardScreenContent(
                         style = medium16
                     )
                 }
-                else {
-                    CircularProgressIndicator()
-                }
 
                 20.VerticalSpace()
 

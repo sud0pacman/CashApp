@@ -81,7 +81,7 @@ class WalletViewModel(private val repository: AppRepository) : ViewModel() {
                                     isLoading = false
                                 )
                             }
-                            onEvent(WalletEvent.LoadData) // Ma'lumotlarni yangilash
+                            onEvent(WalletEvent.LoadData)
                         },
                         onFailure = { e ->
                             _state.update { it.copy(error = e.message, isLoading = false) }
