@@ -45,7 +45,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.sudo_pacman.cashapp.core.utils.VerticalSpace
 import com.sudo_pacman.cashapp.core.utils.clearCardNumber
+import com.sudo_pacman.cashapp.core.utils.expirationDateValidator
 import com.sudo_pacman.cashapp.ui.main_components.CircleShadowComponent
+import com.sudo_pacman.cashapp.ui.main_components.LoadingComponent
 import com.sudo_pacman.cashapp.ui.main_components.PrimaryButton
 import com.sudo_pacman.cashapp.ui.screen.add_card_screen.components.AddCardItem
 import com.sudo_pacman.cashapp.ui.theme.arrowLeftImg
@@ -110,6 +112,7 @@ fun AddCardScreenContent(
     val maxCardLength = 19 // 16 raqam + 3 ta bo'sh joy (#### #### #### ####)
     val maxExpiryLength = 5 // MM/YY
 
+    var isExpirationError by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -139,81 +142,85 @@ fun AddCardScreenContent(
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(20.dp)
-            ,
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-            AddCardItem(
+        Box {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp),
-                content = {
-                    Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
-                        OutlinedTextField(
-                            value = cardNumber,
-                            onValueChange = { input ->
-                                val digits = input.filter { it.isDigit() }
-                                val formatted = digits.chunked(4).joinToString(" ")
-                                if (formatted.length <= maxCardLength) {
-                                    cardNumber = formatted
-                                }
-                                if (digits.length == 16) {
-                                    inputPhase = InputPhase.EXPIRY_DATE
-                                }
-                            },
-                            placeholder = {
-                                Text("0000 0000 0000 0000", style = medium16.copy(color = Color(0xffA1A5B7)))
-                            },
-                            readOnly = true,
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color(0x8E8E8E4D).copy(alpha = 0.30f),
-                                unfocusedBorderColor = Color(0x8E8E8E4D).copy(alpha = 0.30f),
-                            ),
-                            modifier = Modifier.fillMaxWidth(),
-                        )
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(20.dp)
+                ,
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                AddCardItem(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp),
+                    content = {
+                        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+                            OutlinedTextField(
+                                value = cardNumber,
+                                onValueChange = { input ->
+                                    val digits = input.filter { it.isDigit() }
+                                    val formatted = digits.chunked(4).joinToString(" ")
+                                    if (formatted.length <= maxCardLength) {
+                                        cardNumber = formatted
+                                    }
+                                    if (digits.length == 16) {
+                                        inputPhase = InputPhase.EXPIRY_DATE
+                                    }
+                                },
+                                placeholder = {
+                                    Text("0000 0000 0000 0000", style = medium16.copy(color = Color(0xffA1A5B7)))
+                                },
+                                readOnly = true,
+                                shape = RoundedCornerShape(12.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color(0x8E8E8E4D).copy(alpha = 0.30f),
+                                    unfocusedBorderColor = Color(0x8E8E8E4D).copy(alpha = 0.30f),
+                                ),
+                                modifier = Modifier.fillMaxWidth(),
+                            )
 
-                        // Amal qilish muddati
-                        OutlinedTextField(
-                            value = expiryDate,
-                            onValueChange = { input ->
-                                val digits = input.filter { it.isDigit() }
-                                val formatted = when {
-                                    digits.length <= 2 -> digits
-                                    digits.length <= 4 -> digits.substring(0, 2) + "/" + digits.substring(2)
-                                    else -> digits.substring(0, 2) + "/" + digits.substring(2, 4)
-                                }
-                                if (formatted.length <= maxExpiryLength) {
-                                    expiryDate = formatted
-                                }
-                            },
-                            placeholder = {
-                                Text("oo/yy", style = medium16.copy(color = Color(0xffA1A5B7)))
-                            },
-                            readOnly = true,
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color(0x8E8E8E4D).copy(alpha = 0.30f),
-                                unfocusedBorderColor = Color(0x8E8E8E4D).copy(alpha = 0.30f),
-                            ),
-                            modifier = Modifier.width(90.dp),
-                        )
+                            Spacer(modifier = Modifier.height(16.dp))
 
+                            // Amal qilish muddati
+                            OutlinedTextField(
+                                value = expiryDate,
+                                onValueChange = { input ->
+                                    val digits = input.filter { it.isDigit() }
+                                    val formatted = when {
+                                        digits.length <= 2 -> digits
+                                        digits.length <= 4 -> digits.substring(0, 2) + "/" + digits.substring(2)
+                                        else -> digits.substring(0, 2) + "/" + digits.substring(2, 4)
+                                    }
+                                    if (formatted.length <= maxExpiryLength) {
+                                        expiryDate = formatted
+                                    }
+                                },
+                                placeholder = {
+                                    Text("oo/yy", style = medium16.copy(color = Color(0xffA1A5B7)))
+                                },
+                                readOnly = true,
+                                shape = RoundedCornerShape(12.dp),
+                                isError = isExpirationError,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color(0x8E8E8E4D).copy(alpha = 0.30f),
+                                    unfocusedBorderColor = Color(0x8E8E8E4D).copy(alpha = 0.30f),
+                                    errorBorderColor =  Color.Red,
+                                    errorTextColor = Color.Red,
+                                ),
+                                modifier = Modifier.width(90.dp),
+                            )
+
+                        }
                     }
-                }
-            )
+                )
 
-            70.VerticalSpace()
+                70.VerticalSpace()
 
-            if (state.isLoading == false) PrimaryButton(
+                if (state.isLoading == false) PrimaryButton(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
@@ -221,73 +228,86 @@ fun AddCardScreenContent(
                         Log.d("AddCard", "${clearCardNumber(cardNumber)} ==> $expiryDate")
                         onEvent.invoke(AddCard(cardNumber = clearCardNumber(cardNumber), expireDate = expiryDate))
                     },
-                    enabled = cardNumber.length == maxCardLength && expiryDate.length == maxExpiryLength
+                    enabled = cardNumber.length == maxCardLength && expiryDate.length == maxExpiryLength && !isExpirationError
                 ) {
                     Text(
                         "Save",
                         style = medium16
                     )
                 }
-            else {
-                CircularProgressIndicator()
+                else {
+                    CircularProgressIndicator()
+                }
+
+                20.VerticalSpace()
+
+                // Custom number pad
+                NumberPad(
+                    onNumberClick = { digit ->
+                        when (inputPhase) {
+                            InputPhase.CARD_NUMBER -> {
+                                val unformatted = cardNumber.filter { it.isDigit() }
+                                if (unformatted.length < 16) {
+                                    val newInput = unformatted + digit
+                                    val formatted = newInput.chunked(4).joinToString(" ")
+                                    cardNumber = formatted
+                                    if (newInput.length == 16) inputPhase = InputPhase.EXPIRY_DATE
+                                }
+                            }
+
+                            InputPhase.EXPIRY_DATE -> {
+                                val unformatted = expiryDate.filter { it.isDigit() }
+                                if (unformatted.length < 4) {
+                                    val newInput = unformatted + digit
+                                    val formatted = when {
+                                        newInput.length <= 2 -> newInput
+                                        newInput.length <= 4 -> newInput.substring(0, 2) + "/" + newInput.substring(2)
+                                        else -> newInput.substring(0, 2) + "/" + newInput.substring(2, 4)
+                                    }
+                                    expiryDate = formatted
+                                }
+
+                                Log.d("ExpirationCheck", "formatted.length: ${expiryDate.length}   maxExpiryLength: $maxExpiryLength, ${expirationDateValidator(expiryDate)}")
+                                if (expiryDate.length == maxExpiryLength) {
+                                    isExpirationError = !expirationDateValidator(expiryDate)
+                                }
+                            }
+                        }
+                    },
+                    onDeleteClick = {
+                        when (inputPhase) {
+                            InputPhase.EXPIRY_DATE -> {
+                                val digits = expiryDate.filter { it.isDigit() }
+                                if (digits.isNotEmpty()) {
+                                    val newInput = digits.dropLast(1)
+                                    val formatted = when {
+                                        newInput.length <= 2 -> newInput
+                                        else -> newInput.substring(0, 2) + "/" + newInput.substring(2)
+                                    }
+                                    expiryDate = formatted
+                                } else {
+                                    inputPhase = InputPhase.CARD_NUMBER
+
+                                    cardNumber = cardNumber.dropLast(1)
+                                }
+                            }
+
+                            InputPhase.CARD_NUMBER -> {
+                                val digits = cardNumber.filter { it.isDigit() }
+                                if (digits.isNotEmpty()) {
+                                    val newInput = digits.dropLast(1)
+                                    cardNumber = newInput.chunked(4).joinToString(" ")
+                                }
+                            }
+                        }
+                    }
+                )
             }
 
-            20.VerticalSpace()
 
-            // Custom number pad
-            NumberPad(
-                onNumberClick = { digit ->
-                    when (inputPhase) {
-                        InputPhase.CARD_NUMBER -> {
-                            val unformatted = cardNumber.filter { it.isDigit() }
-                            if (unformatted.length < 16) {
-                                val newInput = unformatted + digit
-                                val formatted = newInput.chunked(4).joinToString(" ")
-                                cardNumber = formatted
-                                if (newInput.length == 16) inputPhase = InputPhase.EXPIRY_DATE
-                            }
-                        }
-
-                        InputPhase.EXPIRY_DATE -> {
-                            val unformatted = expiryDate.filter { it.isDigit() }
-                            if (unformatted.length < 4) {
-                                val newInput = unformatted + digit
-                                val formatted = when {
-                                    newInput.length <= 2 -> newInput
-                                    newInput.length <= 4 -> newInput.substring(0, 2) + "/" + newInput.substring(2)
-                                    else -> newInput.substring(0, 2) + "/" + newInput.substring(2, 4)
-                                }
-                                expiryDate = formatted
-                            }
-                        }
-                    }
-                },
-                onDeleteClick = {
-                    when (inputPhase) {
-                        InputPhase.EXPIRY_DATE -> {
-                            val digits = expiryDate.filter { it.isDigit() }
-                            if (digits.isNotEmpty()) {
-                                val newInput = digits.dropLast(1)
-                                val formatted = when {
-                                    newInput.length <= 2 -> newInput
-                                    else -> newInput.substring(0, 2) + "/" + newInput.substring(2)
-                                }
-                                expiryDate = formatted
-                            } else {
-                                inputPhase = InputPhase.CARD_NUMBER
-                            }
-                        }
-
-                        InputPhase.CARD_NUMBER -> {
-                            val digits = cardNumber.filter { it.isDigit() }
-                            if (digits.isNotEmpty()) {
-                                val newInput = digits.dropLast(1)
-                                cardNumber = newInput.chunked(4).joinToString(" ")
-                            }
-                        }
-                    }
-                }
-            )
+            if (state.isLoading) {
+                LoadingComponent()
+            }
         }
     }
 }

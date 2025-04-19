@@ -1,7 +1,9 @@
 package com.sudo_pacman.cashapp.ui.screen.wallet_screen
 
 import MultiShadowBox
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.sudo_pacman.cashapp.core.utils.VerticalSpace
 import com.sudo_pacman.cashapp.core.utils.formatWithCommasAndDecimals
+import com.sudo_pacman.cashapp.ui.main_components.LoadingComponent
 import com.sudo_pacman.cashapp.ui.navigation.Routes
 import com.sudo_pacman.cashapp.ui.screen.add_card_screen.components.AnimatedSettingsList
 import com.sudo_pacman.cashapp.ui.screen.wallet_screen.components.IdentificationRequiredLayout
@@ -119,21 +122,21 @@ fun WalletScreenContent(
                         }
                     },
                     {
-                        state.balance.run {
-                            WalletBalanceLayout(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(100.dp),
-                                balance = this?.formatWithCommasAndDecimals() ?: 0.0.formatWithCommasAndDecimals(),
-                                onClick = {},
-                            )
-                        }
+                        WalletBalanceLayout(
+                            modifier = Modifier
+                                .padding(bottom = 20.dp)
+                                .fillMaxWidth()
+                                .height(100.dp),
+                            balance = state.balance?.formatWithCommasAndDecimals() ?: 0.0.formatWithCommasAndDecimals(),
+                            onClick = {},
+                        )
                     },
-                    { 22.VerticalSpace() },
-                    { IdentificationRequiredLayout() },
-                    { 20.VerticalSpace() },
+                    {
+                        IdentificationRequiredLayout(modifier = Modifier.padding(bottom = 20.dp))
+                    },
                     {
                         MultiShadowBox(
+                            modifier = Modifier.padding(bottom = 16.dp),
                             content = {
                                 WalletSimpleItemContent(
                                     imgSource = promocodeImg,
@@ -145,9 +148,9 @@ fun WalletScreenContent(
                             }
                         )
                     },
-                    { 16.VerticalSpace() },
                     {
                         MultiShadowBox(
+                            modifier = Modifier.padding(bottom = 16.dp),
                             content = {
                                 WalletSwitchesItemContent(
                                     imgSource = cashImg,
@@ -163,9 +166,9 @@ fun WalletScreenContent(
                             onTap = {}
                         )
                     },
-                    { 16.VerticalSpace() },
                     {
                         MultiShadowBox(
+                            modifier = Modifier.padding(bottom = 16.dp),
                             content = {
                                 WalletSwitchesItemContent(
                                     imgSource = cardImg,
@@ -183,7 +186,6 @@ fun WalletScreenContent(
                             onTap = {}
                         )
                     },
-                    { 16.VerticalSpace() },
                     {
                         MultiShadowBox(
                             content = {
@@ -200,9 +202,8 @@ fun WalletScreenContent(
                 )
             )
 
-
             if (state.isLoading) {
-                CircularProgressIndicator()
+                LoadingComponent()
             }
         }
     }

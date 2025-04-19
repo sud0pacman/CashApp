@@ -27,7 +27,7 @@ fun AnimatedSettingsList(items: List<@Composable () -> Unit>, modifier: Modifier
 
             AnimatedVisibility(
                 visible = visible,
-                enter = fadeIn(animationSpec = tween(500)) + slideInVertically(),
+                enter = fadeIn(animationSpec = tween(400)) + slideInVertically(),
             ) {
                 item()
             }
