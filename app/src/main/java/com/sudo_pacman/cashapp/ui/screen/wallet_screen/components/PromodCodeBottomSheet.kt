@@ -73,8 +73,10 @@ fun PromoCodeBottomSheetContent(
         TextField(
             value = text,
             onValueChange = {
-                text = it
-                onValueChange?.invoke(it)
+                if (it.length < 17) {
+                    text = it
+                    onValueChange?.invoke(it)
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()

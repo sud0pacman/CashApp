@@ -12,11 +12,3 @@ data class WalletState(
     val promocodeSuccess: Boolean = false,
     val phone: String = "+998901234567" // Default telefon
 )
-
-sealed class WalletEvent {
-    object LoadData : WalletEvent()
-    object ClickAddNewCard : WalletEvent()
-    data class UpdatePaymentMethod(val method: String, val cardId: Int? = null) : WalletEvent()
-    data class ActivatePromocode(val code: String) : WalletEvent()
-}
-

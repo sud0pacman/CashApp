@@ -16,6 +16,8 @@ fun AppNavHost() {
         startDestination = Routes.Home
     ) {
         composable(Routes.Home) { WalletScreen(navController = navController) }
-        composable(Routes.AddCard) { AddCardScreen(navController = navController) }
+        composable(Routes.AddCard + "/{phoneNumber}") { backStackEntry ->
+            AddCardScreen(navController = navController, phoneNumber = backStackEntry.arguments?.getString("phoneNumber") ?: "+998901234567")
+        }
     }
 }

@@ -29,6 +29,7 @@ import androidx.navigation.NavController
 import com.sudo_pacman.cashapp.core.utils.VerticalSpace
 import com.sudo_pacman.cashapp.core.utils.formatWithCommasAndDecimals
 import com.sudo_pacman.cashapp.ui.navigation.Routes
+import com.sudo_pacman.cashapp.ui.screen.add_card_screen.components.AnimatedSettingsList
 import com.sudo_pacman.cashapp.ui.screen.wallet_screen.components.IdentificationRequiredLayout
 import com.sudo_pacman.cashapp.ui.screen.wallet_screen.components.PromoCodeBottomSheetContent
 import com.sudo_pacman.cashapp.ui.screen.wallet_screen.components.WalletBalanceLayout
@@ -41,14 +42,15 @@ import com.sudo_pacman.cashapp.ui.viewmodel.wallat_view_model.WalletViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun WalletScreen(viewModel: WalletViewModel = koinViewModel(), navController: NavController) {
+fun WalletScreen(navController: NavController) {
+    val viewModel: WalletViewModel = koinViewModel()
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.navigationEvents.collect { event ->
             when (event) {
                 is WalletViewModel.NavigationEvent.NavigateToAddCard -> {
-                    navController.navigate(Routes.AddCard)
+                    navController.navigate(Routes.AddCard+"/${state.phone}")
                 }
             }
         }
@@ -97,120 +99,104 @@ fun WalletScreenContent(
         }
     ) { innerPadding ->
         Box(
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {
-            LazyColumn (
+            AnimatedSettingsList(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                state.error?.let {
-                    item {
-                        Text(text = "Error: $it", color = MaterialTheme.colorScheme.error)
-                    }
-                }
-
-                state.balance?.let {
-                    item {
-                        WalletBalanceLayout(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp),
-                            balance = it.formatWithCommasAndDecimals(),
-                            onClick = {},
+                items = listOf(
+                    {
+                        state.error?.let {
+                            Text(
+                                text = "Error: $it",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
+                    {
+                        state.balance.run {
+                            WalletBalanceLayout(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(100.dp),
+                                balance = this?.formatWithCommasAndDecimals() ?: 0.0.formatWithCommasAndDecimals(),
+                                onClick = {},
+                            )
+                        }
+                    },
+                    { 22.VerticalSpace() },
+                    { IdentificationRequiredLayout() },
+                    { 20.VerticalSpace() },
+                    {
+                        MultiShadowBox(
+                            content = {
+                                WalletSimpleItemContent(
+                                    imgSource = promocodeImg,
+                                    title = "Add Promocode code"
+                                )
+                            },
+                            onTap = {
+                                showBottomSheet = true
+                            }
+                        )
+                    },
+                    { 16.VerticalSpace() },
+                    {
+                        MultiShadowBox(
+                            content = {
+                                WalletSwitchesItemContent(
+                                    imgSource = cashImg,
+                                    title = "Cash",
+                                    onCheckedChange = {
+                                        cashIsChecked = !cashIsChecked
+                                        if (cashIsChecked) onEvent(WalletEvent.UpdatePaymentMethod(method = "cash"))
+                                        else onEvent(WalletEvent.UpdatePaymentMethod(method = "card"))
+                                    },
+                                    isChecked = cashIsChecked
+                                )
+                            },
+                            onTap = {}
+                        )
+                    },
+                    { 16.VerticalSpace() },
+                    {
+                        MultiShadowBox(
+                            content = {
+                                WalletSwitchesItemContent(
+                                    imgSource = cardImg,
+                                    title = "Card **** ${if (state.cards.isNotEmpty()) state.cards.first().number.substring(12) else "7777"}",
+                                    onCheckedChange = {
+                                        cardIsChecked = !cardIsChecked
+                                        if (!state.isLoading) {
+                                            if (cardIsChecked) onEvent(WalletEvent.UpdatePaymentMethod(method = "card", cardId = state.cards.first().id))
+                                            else onEvent(WalletEvent.UpdatePaymentMethod(method = "cash"))
+                                        }
+                                    },
+                                    isChecked = cardIsChecked
+                                )
+                            },
+                            onTap = {}
+                        )
+                    },
+                    { 16.VerticalSpace() },
+                    {
+                        MultiShadowBox(
+                            content = {
+                                WalletSimpleItemContent(
+                                    imgSource = addCardImg,
+                                    title = "Add new card"
+                                )
+                            },
+                            onTap = {
+                                onEvent(WalletEvent.ClickAddNewCard)
+                            }
                         )
                     }
-                }
+                )
+            )
 
-                item {
-                    22.VerticalSpace()
-                }
-
-                item {
-                    IdentificationRequiredLayout()
-                }
-
-                item {
-                    20.VerticalSpace()
-                }
-
-                item {
-                    MultiShadowBox(
-                        content = {
-                            WalletSimpleItemContent(imgSource = promocodeImg, title = "Add Promocode code")
-                        },
-                        onTap = {
-                            showBottomSheet = true
-                        }
-                    )
-                }
-
-                item {
-                    16.VerticalSpace()
-                }
-
-                item {
-                    MultiShadowBox(
-                        content = {
-                            WalletSwitchesItemContent(
-                                imgSource = cashImg,
-                                title = "Cash",
-                                onCheckedChange = {
-                                    cashIsChecked = !cashIsChecked
-                                    if (cashIsChecked) onEvent(WalletEvent.UpdatePaymentMethod(method = "cash"))
-                                    else onEvent(WalletEvent.UpdatePaymentMethod(method = "card"))
-                                },
-                                isChecked = cashIsChecked
-                            )
-                        },
-                        onTap = {}
-                    )
-                }
-
-                item {
-                    16.VerticalSpace()
-                }
-
-                item {
-                    MultiShadowBox(
-                        content = {
-                            WalletSwitchesItemContent(
-                                imgSource = cardImg,
-                                title = "Card **** ${if (state.cards.isNotEmpty()) state.cards.first().number.substring(12) else "7777"}",
-                                onCheckedChange = {
-                                    cardIsChecked = !cardIsChecked
-                                    if (state.isLoading == false) {
-                                        if (cardIsChecked) onEvent(WalletEvent.UpdatePaymentMethod(method = "card", cardId = state.cards.first().id))
-                                        else onEvent(WalletEvent.UpdatePaymentMethod(method = "cash"))
-                                    }
-                                },
-                                isChecked = cardIsChecked
-                            )
-                        },
-                        onTap = {}
-                    )
-                }
-
-                item {
-                    16.VerticalSpace()
-                }
-
-                item {
-                    MultiShadowBox(
-                        content = {
-                            WalletSimpleItemContent(
-                                imgSource = addCardImg,
-                                title = "Add new card",
-                            )
-                        },
-                        onTap = {
-                            onEvent(WalletEvent.ClickAddNewCard)
-                        }
-                    )
-                }
-            }
 
             if (state.isLoading) {
                 CircularProgressIndicator()

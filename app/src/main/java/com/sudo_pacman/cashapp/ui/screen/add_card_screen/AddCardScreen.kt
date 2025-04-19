@@ -1,7 +1,6 @@
 package com.sudo_pacman.cashapp.ui.screen.add_card_screen
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
@@ -25,9 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -41,7 +37,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -63,12 +58,11 @@ import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddCardScreen(viewModel: AddCardViewModel = koinViewModel(), navController: NavController) {
+fun AddCardScreen(viewModel: AddCardViewModel = koinViewModel(), navController: NavController, phoneNumber: String) {
     val state by viewModel.state.collectAsState()
-    val context = LocalContext.current
 
-    LaunchedEffect(state.message) {
-        Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+    LaunchedEffect(Unit) {
+        viewModel.onEvent(AddCardEvent.PhoneNumber(phoneNumber))
     }
 
     LaunchedEffect(Unit) {
@@ -138,6 +132,7 @@ fun AddCardScreenContent(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             AddCardItem(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -207,10 +202,8 @@ fun AddCardScreenContent(
                         .fillMaxWidth()
                         .height(48.dp),
                     onClick = {
-//                        cardNumber = "1234123412341234"
-//                        expiryDate = "12/25"
                         Log.d("AddCard", "${clearCardNumber(cardNumber)} ==> $expiryDate")
-                        onEvent.invoke(AddCard(phoneNumber = "+998901234567", cardNumber = clearCardNumber(cardNumber), expireDate = expiryDate))
+                        onEvent.invoke(AddCard(cardNumber = clearCardNumber(cardNumber), expireDate = expiryDate))
                     },
                     enabled = cardNumber.length == maxCardLength && expiryDate.length == maxExpiryLength
                 ) {
