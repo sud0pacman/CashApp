@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.sudo_pacman.cashapp.core.utils.VerticalSpace
@@ -45,6 +46,8 @@ import org.koin.androidx.compose.koinViewModel
 fun WalletScreen(navController: NavController) {
     val viewModel: WalletViewModel = koinViewModel()
     val state by viewModel.state.collectAsState()
+
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.navigationEvents.collect { event ->

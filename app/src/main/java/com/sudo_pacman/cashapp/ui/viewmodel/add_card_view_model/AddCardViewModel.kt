@@ -20,7 +20,7 @@ class AddCardViewModel(private val repository: AppRepository) : ViewModel() {
     val state: StateFlow<AddCardState> = _state.asStateFlow()
     private val _navigationEvents = Channel<NavigationEvent>()
     val navigationEvents = _navigationEvents.receiveAsFlow()
-    private var phoneNumber = "";
+    private var phoneNumber = ""
 
 
     fun onEvent(event: AddCardEvent) {
@@ -32,7 +32,7 @@ class AddCardViewModel(private val repository: AppRepository) : ViewModel() {
                         val request = AddCardRequest(event.cardNumber, event.expireDate)
                         repository.addCard(phoneNumber, request).fold(
                             onSuccess = {
-                                Log.d("AddCard", "success ${it}")
+                                Log.d("AddCard", "success $it")
                                 _state.update { it.copy(isLoading = false, message = "Successfully added") }
                                 _navigationEvents.send(AddCardViewModel.NavigationEvent.Back)
                             },
